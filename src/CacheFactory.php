@@ -2,6 +2,7 @@
 
 namespace Mk4U\Cache;
 
+use Database;
 use Mk4U\Cache\Drivers\Apcu;
 use Mk4U\Cache\Drivers\File;
 
@@ -13,6 +14,7 @@ class CacheFactory
     private const DRIVER = [
         'apcu' => Apcu::class,
         'file' => File::class,
+        'database' => Database::class,
     ];
 
     public static function create(?string $driver = null, array $config = [])
