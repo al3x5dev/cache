@@ -3,7 +3,7 @@
 namespace Mk4U\Cache\Drivers;
 
 use Mk4U\Cache\Exceptions\CacheException;
-use Mk4U\Cache\HelperTrait;
+use Mk4U\Cache\KeyHelperTrait;
 use Psr\SimpleCache\CacheInterface;
 
 /**
@@ -13,7 +13,7 @@ class Apcu implements CacheInterface
 {
     protected int $ttl = 300;
 
-    use HelperTrait;
+    use KeyHelperTrait;
 
     public function __construct(array $config)
     {

@@ -3,7 +3,7 @@
 namespace Mk4U\Cache\Drivers;
 
 use Mk4U\Cache\Exceptions\CacheException;
-use Mk4U\Cache\HelperTrait;
+use Mk4U\Cache\KeyHelperTrait;
 use Psr\SimpleCache\CacheInterface;
 
 /**
@@ -20,7 +20,7 @@ class File implements CacheInterface
     /** @param int|null $ttl Tiempo de vida de la cache*/
     protected ?int $ttl = null;
 
-    use HelperTrait;
+    use KeyHelperTrait;
 
     public function __construct(array $config)
     {

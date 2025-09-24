@@ -2,7 +2,7 @@
 
 namespace Mk4U\Cache;
 
-trait HelperTrait{
+trait KeyHelperTrait{
     /**
      * Validar $key
      */
