@@ -1,6 +1,8 @@
 <?php
 
-use Mk4U\Cache\Connection\DB;
+namespace Mk4U\Cache\Stores;
+
+use Mk4U\Cache\Exceptions\InvalidArgumentException;
 use Psr\SimpleCache\CacheInterface;
 
 /**
@@ -8,10 +10,8 @@ use Psr\SimpleCache\CacheInterface;
  */
 class Database implements CacheInterface
 {
-    protected DB $db;
-    public function __construct(array $config)
-    {
-        $this->db = DB::connection($config);
+    public function __construct(array $config) {
+        
     }
 
     /**
@@ -42,7 +42,12 @@ class Database implements CacheInterface
      * @return iterable Un array asociativo de claves y sus correspondientes 
      * valores almacenados en caché.
      */
-    public function getMultiple(iterable $keys, mixed $default = null): iterable {}
+    public function getMultiple(iterable $keys, mixed $default = null): iterable
+    {
+        if (!is_array($keys) || !($keys instanceof \Traversable)) {
+            throw new InvalidArgumentException('$keys is neither an array nor a Traversable');
+        }
+    }
 
     /**
      * Almacena múltiples valores en la caché.
@@ -53,7 +58,12 @@ class Database implements CacheInterface
      * de caché.
      * @return bool Verdadero en caso de éxito, falso en caso de fallo.
      */
-    public function setMultiple(iterable $values, null|int|DateInterval $ttl = null): bool {}
+    public function setMultiple(iterable $values, null|int|DateInterval $ttl = null): bool
+    {
+        if (!is_array($values) || !($values instanceof \Traversable)) {
+            throw new InvalidArgumentException('$values is neither an array nor a Traversable');
+        }
+    }
 
     /**
      * Elimina múltiples valores de la caché por sus claves.
@@ -61,7 +71,12 @@ class Database implements CacheInterface
      * @param iterable $keys Una colección iterable de claves de caché a eliminar.
      * @return bool Verdadero en caso de éxito, falso en caso de fallo.
      */
-    public function deleteMultiple(iterable $keys): bool {}
+    public function deleteMultiple(iterable $keys): bool
+    {
+        if (!is_array($keys) || !($keys instanceof \Traversable)) {
+            throw new InvalidArgumentException('$keys is neither an array nor a Traversable');
+        }
+    }
 
     /**
      * Verifica si un valor existe en la caché por su clave.
