@@ -14,11 +14,18 @@ class CacheFactory
 {
     public static function create(string $store = 'file', array $config = [])
     {
-        return match ($store) {
-            'apcu' => new Apcu($config),
+        $instance = match ($store) {
             'file' => new File($config),
+            'apcu' => new Apcu($config),
             'database' => new Database($config),
-            default => throw new InvalidArgumentException("Unsupported store: $store")
+            default => throw new InvalidArgumentException("Unsupported store: {$store}")
         };
+
+        // Para DatabaseStore, ofrecemos inicialización explícita
+        if ($store === 'database' && ($config['initialize'] ?? false)) {
+            $instance->initialize();
+        }
+
+        return $instance;
     }
 }
