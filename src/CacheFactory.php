@@ -2,25 +2,23 @@
 
 namespace Mk4U\Cache;
 
-use Database;
-use Mk4U\Cache\Drivers\Apcu;
-use Mk4U\Cache\Drivers\File;
+use Mk4U\Cache\Exceptions\InvalidArgumentException;
+use Mk4U\Cache\Stores\Apcu;
+use Mk4U\Cache\Stores\Database;
+use Mk4U\Cache\Stores\File;
 
 /**
  * Cache Factory
  */
 class CacheFactory
 {
-    private const DRIVER = [
-        'apcu' => Apcu::class,
-        'file' => File::class,
-        'database' => Database::class,
-    ];
-
-    public static function create(?string $driver = null, array $config = [])
+    public static function create(string $store = 'file', array $config = [])
     {
-        $cache = empty($driver) ? self::DRIVER['file'] : self::DRIVER[$driver];
-
-        return new $cache($config);
+        return match ($store) {
+            'apcu' => new Apcu($config),
+            'file' => new File($config),
+            'database' => new Database($config),
+            default => throw new InvalidArgumentException("Unsupported store: $store")
+        };
     }
 }
