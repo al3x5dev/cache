@@ -81,7 +81,7 @@ class Apcu implements CacheInterface
      */
     public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
-        if (!is_array($keys) || !($keys instanceof \Traversable)) {
+        if (!is_array($keys) && !($keys instanceof \Traversable)) {
             throw new InvalidArgumentException('$keys is neither an array nor a Traversable');
         }
 
@@ -104,7 +104,7 @@ class Apcu implements CacheInterface
      */
     public function setMultiple(iterable $values, null|int|\DateInterval $ttl = null): bool
     {
-        if (!is_array($values) || !($values instanceof \Traversable)) {
+        if (!is_array($values) && !($values instanceof \Traversable)) {
             throw new InvalidArgumentException('$values is neither an array nor a Traversable');
         }
 
@@ -125,7 +125,7 @@ class Apcu implements CacheInterface
      */
     public function deleteMultiple(iterable $keys): bool
     {
-        if (!is_array($keys) || !($keys instanceof \Traversable)) {
+        if (!is_array($keys) && !($keys instanceof \Traversable)) {
             throw new InvalidArgumentException('$keys is neither an array nor a Traversable');
         }
 

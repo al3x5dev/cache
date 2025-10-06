@@ -17,8 +17,8 @@ class File implements CacheInterface
     /** @param string|null $cacheDir Directorio raiz donde se almacenara toda la cache*/
     protected ?string $cacheDir = null;
 
-    /** @param int|null $ttl Tiempo de vida de la cache*/
-    protected ?int $ttl = null;
+    /** @param int $ttl Tiempo de vida de la cache*/
+    protected int $ttl = 300;
 
     use KeyHelperTrait;
 
@@ -27,7 +27,7 @@ class File implements CacheInterface
         //Establecer los parametros
         $this->ext = $config['ext'] ?? $this->ext;
         $this->cacheDir = !empty($config['dir']) ? trim($config['dir'], '/') : 'cache';
-        $this->ttl = $config['ttl'] ?? 300;
+        $this->ttl = $config['ttl'] ?? $this->ttl;
 
         if (!file_exists($this->cacheDir)) {
             throw new \RuntimeException(sprintf("'%s' directory not found", $this->cacheDir));
@@ -131,7 +131,7 @@ class File implements CacheInterface
      */
     public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
-        if (!is_array($keys) || !($keys instanceof \Traversable)) {
+        if (!is_array($keys) && !($keys instanceof \Traversable)) {
             throw new InvalidArgumentException('$keys is neither an array nor a Traversable');
         }
 
@@ -153,7 +153,7 @@ class File implements CacheInterface
      */
     public function setMultiple(iterable $values, null|int|\DateInterval $ttl = null): bool
     {
-        if (!is_array($values) || !($values instanceof \Traversable)) {
+        if (!is_array($values) && !($values instanceof \Traversable)) {
             throw new \InvalidArgumentException('$values is neither an array nor a Traversable');
         }
 
@@ -173,7 +173,7 @@ class File implements CacheInterface
      */
     public function deleteMultiple(iterable $keys): bool
     {
-        if (!is_array($keys) || !($keys instanceof \Traversable)) {
+        if (!is_array($keys) && !($keys instanceof \Traversable)) {
             throw new InvalidArgumentException('$keys is neither an array nor a Traversable');
         }
 
