@@ -4,7 +4,7 @@ namespace Mk4U\Cache\Stores;
 
 use Mk4U\Cache\Connections\DB;
 use Mk4U\Cache\Connections\Drivers\Mysql;
-use Mk4U\Cache\Connections\Drivers\SQLite;
+use Mk4U\Cache\Connections\Drivers\Sqlite;
 use Mk4U\Cache\Exceptions\InvalidArgumentException;
 use Mk4U\Cache\KeyHelperTrait;
 use Psr\SimpleCache\CacheInterface;
@@ -22,7 +22,7 @@ class Database implements CacheInterface
     public function __construct(array $config)
     {
         $this->db = match ($config['connection'] ?? 'sqlite') {
-            'sqlite' => new SQLite($config['database']),
+            'sqlite' => new Sqlite($config['database']),
             'mysql' => new Mysql(
                 $config['host'] ?? 'localhost',
                 $config['port'] ?? 3306,
