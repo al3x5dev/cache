@@ -7,18 +7,21 @@
 A simple and flexible cache system for PHP.
 
 ## Features
-* Support for multiple cache drivers (APCu and files)
+* Support for multiple cache drivers (APCu, files, SQLite and MySQL/MariaDB)
 * Implementation of the `Psr\SimpleCache\CacheInterface` interface.
 * Efficient storage and retrieval of data.
 
 > [!IMPORTANT]
-> The file driver `Mk4U\Cache\Drivers\File` is suitable for storing small amounts of data in cache. However, as the number of records increases, performance may be affected due to the latency of disk I/O operations.
+> The file driver `Mk4U\Cache\Stores\File` is suitable for storing small amounts of data in cache. However, as the number of records increases, performance may be affected due to the latency of disk I/O operations.
 > 
-> For applications that require storing large volumes of data or high performance, it is recommended to consider using in-memory cache drivers, such as APCu, <!--Redis, or Memcached,--> which are designed to handle large amounts of data more efficiently.
+> For applications that require storing large volumes of data or high performance, it is recommended to consider using in-memory cache drivers, such as APCu, or database drivers such as SQLite and MySQL/MariaDB <!--Redis, or Memcached,--> which are designed to handle large amounts of data more efficiently.
 
 ## Requirements
 * PHP 8.2 or higher
 * APCu extension (optional)
+* PDO Extension
+* SQLite Extension (for the SQLite driver)
+* MySQLi or PDO_MySQL Extension (for the MySQL/MariaDB driver)
 
 ## Installation
 ```bash
@@ -31,25 +34,33 @@ composer require mk4u/cache
 To use the library, you must first create an instance of the cache driver you want to use. The library includes a `Mk4U\Cache\CacheFactory` that makes it easy to create instances of the cache drivers.
 
 > [!TIP]
-> If no parameters are passed to the `Mk4U\Cache\CacheFactory::create()`, an object of type `Mk4U\Cache\Drivers\File` will be created by default.
+> If no parameters are passed to the `Mk4U\Cache\CacheFactory::create()`, an object of type `Mk4U\Cache\Stores\File` will be created by default.
 
 > [!NOTE]
-> By default the `Mk4U\Cache\Drivers\File` object sets the following configuration parameters:
+> By default the `Mk4U\Cache\Stores\File` object sets the following configuration parameters:
 >
 > ```php
 > [
->    //extension of cache files
+>    // extension of cache files
 >    'ext' =>'cache',
->    //directory where the cache will be stored, if it does not exist create it.
+>    // directory where the cache will be stored, if it does not exist create it.
 >    'dir' => '/cache',
->    //cache lifetime in seconds (default 5 minutes.)
+>    // cache lifetime in seconds (default 5 minutes.)
 >    'ttl' => 300
 > ]
 > ```
 
-#### Example of use with the `Mk4U\Cache\Drivers\File` driver
+#### Example of use with the `Mk4U\Cache\Stores\File`
 ```php
 require 'vendor/autoload.php';
+
+$cache = Mk4U\Cache\CacheFactory::create();
+// Default Configuration Parameters
+// .cache file extension
+// Directory where the cache will be stored (/var/www/html/webapp/cache).
+// Cache lifetime in seconds (default: 5 minutes).
+
+// or
 
 // Cache driver configuration
 $config = [
@@ -64,7 +75,7 @@ $cache = Mk4U\Cache\CacheFactory::create('file', $config);
 > [!IMPORTANT]
 > Make sure you set the necessary permissions for the creation of directories and cache files. 
 
-#### Example of use with `Mk4U\Cache\Drivers\Apcu` driver
+#### Example of use with `Mk4U\Cache\Stores\Apcu`
 ```php
 require 'vendor/autoload.php';
 
@@ -76,8 +87,47 @@ $config = [
 // Create an instance of the APCu cache driver.
 $cache = Mk4U\Cache\CacheFactory::create('apcu', $config);
 ```
-`Mk4U\Cache\Drivers\Apcu` has only one configurable parameter and it is `ttl`, by default its value is 300 seconds (5 minutes).
+`Mk4U\Cache\Stores\Apcu` has only one configurable parameter and it is `ttl`, by default its value is 300 seconds (5 minutes).
 
+#### Example of use with `Mk4U\Cache\Stores\Database`
+```php
+require 'vendor/autoload.php';
+
+// SQLite
+$sqlite = [
+    // 'connection'=>'sqlite',
+    'database' => '/path/to/cache.sqlite',
+    // 'ttl' => 300 
+];
+
+// Create an instance of the APCu cache driver.
+$cache = Mk4U\Cache\CacheFactory::create('database', $sqlite);
+
+// MySQL|MariaDB
+$mysql = [
+    'connection'=>'mysql', // default sqlite
+    'host' => 'localhost', // default localhost
+    'port' => 3306, // default 3306
+    'database' => 'my_db',
+    'user' => 'root', // default root
+    'password' => '', // default empty
+    'ttl' => 3600 // default 5 minutes.
+];
+
+$cache = Mk4U\Cache\CacheFactory::create('database', $mysql);
+```
+
+### Driver Comparison Table
+
+| Feature | File | APCu | SQLite | MySQL/MariaDB |
+|---------|------|------|---------|---------------|
+| Best Use Case | Small datasets, simple applications | High performance, volatile data | Medium datasets, persistent storage with good performance | Distributed applications, existing database infrastructure |
+| Persistence | Yes (Files) | No (Memory) | Yes (Database file) | Yes (Database server) |
+| Performance | Slow (Disk I/O) | Very Fast (Memory) | Good | Good (Network dependent) |
+| Scalability | Low | Low (Single server) | Medium | High |
+
+> [!NOTE]
+> For SQLite and MySQL/MariaDB drivers, the cache table is created dynamically
 
 ### Available methods
 The cache class implements the following methods of the CacheInterface interface:
@@ -162,7 +212,7 @@ The library throws the following exceptions:
 Contributions are welcome. If you wish to contribute, please open an issue or a pull request in the repository.
 
 ## License
-This project is licensed under the [MIT License](https://github.com/alexsandrov16/cache?tab=MIT-1-ov-file).
+This project is licensed under the [MIT License](https://github.com/al3x5dev/cache?tab=MIT-1-ov-file).
 
 ## Contact
-If you have any questions or comments, feel free to contact me at [Telegram](http://t.me/alexsadrov16).
+If you have any questions or comments, feel free to contact me at [Telegram](http://t.me/al3x5dev).
