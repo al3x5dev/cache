@@ -1,25 +1,38 @@
 <?php
 
-namespace Mk4U\Cache\Drivers;
+namespace Mk4U\Cache\Stores;
 
-use Mk4U\Cache\Exceptions\CacheException;
+use Mk4U\Cache\Connections\DB;
+use Mk4U\Cache\Connections\Drivers\Mysql;
+use Mk4U\Cache\Connections\Drivers\Sqlite;
+use Mk4U\Cache\Exceptions\InvalidArgumentException;
 use Mk4U\Cache\KeyHelperTrait;
 use Psr\SimpleCache\CacheInterface;
 
 /**
- * APCU class
+ * undocumented class
  */
-class Apcu implements CacheInterface
+class Database implements CacheInterface
 {
+    protected DB $db;
     protected int $ttl = 300;
 
     use KeyHelperTrait;
 
     public function __construct(array $config)
     {
-        if (!extension_loaded('apcu')) {
-            throw new CacheException('Error: APCu is not enabled.');
-        }
+        $this->db = match ($config['connection'] ?? 'sqlite') {
+            'sqlite' => new Sqlite($config['database']),
+            'mysql' => new Mysql(
+                $config['host'] ?? 'localhost',
+                $config['port'] ?? 3306,
+                $config['database'],
+                $config['user'] ?? 'root',
+                $config['pass'] ?? ''
+            ),
+            default => throw new InvalidArgumentException("Unsupported database drivers: {$config['connection']}")
+        };
+        $this->db->makeTable();
 
         $this->ttl = $config['ttl'] ?? $this->ttl;
     }
@@ -29,9 +42,18 @@ class Apcu implements CacheInterface
      */
     public function get(string $key, mixed $default = null): mixed
     {
+
         if ($this->has($key)) {
-            return apcu_fetch($this->hashedKey($key));
+            $cache = $this->db->get($this->hashedKey($key));
+
+            if ($cache[0]->expire <= time()) {
+                $this->delete($key);
+                return $default;
+            }
+
+            return unserialize($cache[0]->value);
         }
+
         return $default;
     }
 
@@ -40,14 +62,11 @@ class Apcu implements CacheInterface
      */
     public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
     {
-        if ($this->has($key)) {
-            $this->delete($key);
-        }
-
-        return apcu_store(
+        return $this->db->set(
             $this->hashedKey($key),
-            $value,
-            $ttl ?? $this->ttl);
+            serialize($value),
+            time() + ($ttl ?? $this->ttl)
+        );
     }
 
     /**
@@ -56,7 +75,7 @@ class Apcu implements CacheInterface
     public function delete(string $key): bool
     {
         if ($this->has($key)) {
-            return apcu_delete($this->hashedKey($key));
+            return $this->db->delete($this->hashedKey($key));
         }
 
         return false;
@@ -67,7 +86,7 @@ class Apcu implements CacheInterface
      */
     public function clear(): bool
     {
-        return apcu_clear_cache();
+        return $this->db->clear();
     }
 
     /**
@@ -80,13 +99,16 @@ class Apcu implements CacheInterface
      */
     public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
-        if (!is_array($keys)) throw new \InvalidArgumentException('$keys is neither an array nor a Traversable');
+        if (!is_array($keys) && !($keys instanceof \Traversable)) {
+            throw new InvalidArgumentException('$keys is neither an array nor a Traversable');
+        }
 
         $values = [];
 
         foreach ($keys as $key) {
             $values[$key] = $this->get($key, $default);
         }
+
         return $values;
     }
 
@@ -101,7 +123,9 @@ class Apcu implements CacheInterface
      */
     public function setMultiple(iterable $values, null|int|\DateInterval $ttl = null): bool
     {
-        if (!is_array($values)) throw new \InvalidArgumentException('$values is neither an array nor a Traversable');
+        if (!is_array($values) && !($values instanceof \Traversable)) {
+            throw new InvalidArgumentException('$values is neither an array nor a Traversable');
+        }
 
         $result = [];
 
@@ -120,7 +144,9 @@ class Apcu implements CacheInterface
      */
     public function deleteMultiple(iterable $keys): bool
     {
-        if (!is_array($keys)) throw new \InvalidArgumentException('$keys is neither an array nor a Traversable');
+        if (!is_array($keys) && !($keys instanceof \Traversable)) {
+            throw new InvalidArgumentException('$keys is neither an array nor a Traversable');
+        }
 
         $result = [];
 
@@ -136,6 +162,6 @@ class Apcu implements CacheInterface
      */
     public function has(string $key): bool
     {
-        return apcu_exists($this->hashedKey($key));
+        return $this->db->exists($this->hashedKey($key));
     }
 }

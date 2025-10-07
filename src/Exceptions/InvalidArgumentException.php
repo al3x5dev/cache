@@ -2,12 +2,12 @@
 
 namespace Mk4U\Cache\Exceptions;
 
-use Psr\SimpleCache\InvalidArgumentException as InvArgException;
+use Psr\SimpleCache\InvalidArgumentException as SimpleCacheInvalidArgumentException;
 
 /**
- * undocumented class
+ * InvalidArgumentException class
  */
-class InvalidArgumentException extends \InvalidArgumentException implements InvArgException
+class InvalidArgumentException extends CacheException implements SimpleCacheInvalidArgumentException
 {
     
 }
