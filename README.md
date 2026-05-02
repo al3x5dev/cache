@@ -36,20 +36,6 @@ To use the library, you must first create an instance of the cache driver you wa
 > [!TIP]
 > If no parameters are passed to the `Mk4U\Cache\CacheFactory::create()`, an object of type `Mk4U\Cache\Stores\File` will be created by default.
 
-> [!NOTE]
-> By default the `Mk4U\Cache\Stores\File` object sets the following configuration parameters:
->
-> ```php
-> [
->    // extension of cache files
->    'ext' =>'cache',
->    // directory where the cache will be stored, if it does not exist create it.
->    'dir' => '/cache',
->    // cache lifetime in seconds (default 5 minutes.)
->    'ttl' => 300
-> ]
-> ```
-
 #### Example of use with the `Mk4U\Cache\Stores\File`
 ```php
 require 'vendor/autoload.php';
