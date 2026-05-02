@@ -13,7 +13,7 @@ use Psr\SimpleCache\CacheInterface;
  */
 class CacheFactory
 {
-    private static $instance=null;
+    private static ?CacheInterface $instance = null;
 
     public static function create(string $store = 'file', array $config = [])
     {
